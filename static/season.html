@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>Season Detail</title></head>
+<body>
+<a href="/">← Back to all seasons</a>
+<h1 id="season-title"></h1>
+
+<div id="signs"></div>
+
+<script>
+    const seasonName = "SEASON_PLACEHOLDER";
+
+    document.getElementById('season-title').textContent = seasonName;
+
+    fetch('/api/signs?season=' + seasonName)
+    .then(res => res.json())
+    .then(signs => {
+        const container = document.getElementById('signs');
+
+        const categories = {};
+        signs.forEach(sign => {
+            if (!categories[sign.category]) {
+                categories[sign.category] = [];
+            }
+            categories[sign.category].push(sign);
+        });
+
+        Object.keys(categories).forEach(category => {
+            const heading = document.createElement('h2');
+            heading.textContent = category;
+            container.appendChild(heading);
+
+            categories[category].forEach(sign => {
+                const div = document.createElement('div');
+                div.innerHTML = `<h3>${sign.name}</h3>
+                                <p>${sign.description}</p>
+                                <p><em>Source: ${sign.source}</em></p>`;
+                container.appendChild(div);
+            });
+        });
+    });
+</script>
+</body>
+</html>

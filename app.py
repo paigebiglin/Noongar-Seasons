@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 import csv
 
 app = Flask(__name__, static_folder='static')
@@ -14,6 +14,13 @@ def home():
 @app.route('/api/seasons')
 def get_seasons():
         return jsonify(load_seasons())
+
+@app.route('/season/<season_name>')
+def season_page(season_name):
+    with open('static/season.html') as f:
+        html = f.read()
+    html = html.replace('SEASON_PLACEHOLDER', season_name)
+    return html
 
 def load_weather():
     with open('data/weather.csv') as f:
@@ -65,6 +72,18 @@ def get_season_stats():
         }
 
     return jsonify(stats)
+
+def load_signs():
+    with open('data/signs.csv') as f:
+        return list(csv.DictReader(f))
+
+@app.route('/api/signs')
+def get_signs():
+    season = request.args.get('season')
+    signs = load_signs()
+    if season:
+        signs = [s for s in signs if s['season_name'] == season]
+    return jsonify(signs)
 
 if __name__ == '__main__':
         app.run(debug=True, port=5001)

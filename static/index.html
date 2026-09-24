@@ -29,7 +29,7 @@ function showSeasons() {
     seasonsData.forEach(s => {
         const stats = statsData[s.season_name];
         const div = document.createElement('div');
-        div.innerHTML = `<h2>${s.season_name} (${s.noongar_name})</h2>
+        div.innerHTML = `<h2><a href="/season/${s.season_name}">${s.season_name} (${s.noongar_name})</a></h2>
                         <p>${s.gregorian_months}</p>
                         <p>${s.weather_desc}</p>
                         <p><strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min, ${stats.total_rainfall}mm total rain</p>`;
