@@ -125,21 +125,27 @@ def get_monthly_trend():
     weather = load_weather()
     monthly = {}
 
-    for day in weather:
-        month = day['date'][:7]
-        if month not in monthly:
-            monthly[month] = 0
-        monthly[month] += float(day['rainfall_mm'])
+    month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                   'July', 'August', 'September', 'October', 'November', 'December']
 
-    months = list(monthly.keys())
-    for i in range(len(months)):
-        for j in range(len(months) - 1 - i):
-            if months[j] > months[j + 1]:
-                months[j], months[j + 1] = months[j + 1], months[j]
+    for day in weather:
+        month_key = day['date'][:7]
+        if month_key not in monthly:
+            monthly[month_key] = 0
+        monthly[month_key] += float(day['rainfall_mm'])
+
+    month_keys = list(monthly.keys())
+    for i in range(len(month_keys)):
+        for j in range(len(month_keys) - 1 - i):
+            if month_keys[j] > month_keys[j + 1]:
+                month_keys[j], month_keys[j + 1] = month_keys[j + 1], month_keys[j]
 
     trend = []
-    for m in months:
-        trend.append({'month': m, 'rainfall': round(monthly[m], 1)})
+    for key in month_keys:
+        year = key[:4]
+        month_number = int(key[5:7])
+        month_label = month_names[month_number - 1] + ' ' + year
+        trend.append({'month': month_label, 'rainfall': round(monthly[key], 1)})
 
     return jsonify(trend)
 
