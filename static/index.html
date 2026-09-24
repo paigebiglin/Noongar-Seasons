@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>Noongar Seasons</title></head>
+<body>
+<h1>Noongar Six Seasons</h1>
+<div id="seasons"></div>
+
+<script>
+    fetch('/api/seasons')
+    .then(res => res.json())
+    .then(seasons => {
+        const container = document.getElementById('seasons');
+        seasons.forEach(s => {
+            const div = document.createElement('div');
+            div.innerHTML = `<h2>${s.season_name} (${s.noongar_name})</h2>
+            <p>${s.gregorian_months}</p>
+            <p>${s.weather_desc}</p>`;
+            container.appendChild(div);
+        });
+    });
+</script>
+</body>
+</html>
+
+
