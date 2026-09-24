@@ -2,6 +2,8 @@
 
 An interactive app exploring the Noongar six-season calendar, comparing traditional seasonal knowledge against real recorded weather data for Perth, WA.
 
+**Live app:** https://paigebiglin.pythonanywhere.com
+
 ## Installation
 
 1. Make sure Python 3 is installed.
