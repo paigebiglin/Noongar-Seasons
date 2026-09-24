@@ -4,20 +4,60 @@
 <body>
 <h1>Noongar Six Seasons</h1>
 <div id="seasons"></div>
+<h2>Total rainfall by season</h2>
+<div id="rain-chart"></div>
 
 <script>
-    fetch('/api/seasons')
-    .then(res => res.json())
-    .then(seasons => {
-        const container = document.getElementById('seasons');
-        seasons.forEach(s => {
-            const div = document.createElement('div');
-            div.innerHTML = `<h2>${s.season_name} (${s.noongar_name})</h2>
-            <p>${s.gregorian_months}</p>
-            <p>${s.weather_desc}</p>`;
-            container.appendChild(div);
-        });
+    let seasonsData = [];
+let statsData = {};
+
+fetch('/api/seasons')
+.then(res => res.json())
+.then(seasons => {
+    seasonsData = seasons;
+    return fetch('/api/season-stats');
+})
+.then(res => res.json())
+.then(stats => {
+    statsData = stats;
+    showSeasons();
+    showChart();
+});
+
+function showSeasons() {
+    const container = document.getElementById('seasons');
+    seasonsData.forEach(s => {
+        const stats = statsData[s.season_name];
+        const div = document.createElement('div');
+        div.innerHTML = `<h2>${s.season_name} (${s.noongar_name})</h2>
+                        <p>${s.gregorian_months}</p>
+                        <p>${s.weather_desc}</p>
+                        <p><strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min, ${stats.total_rainfall}mm total rain</p>`;
+        container.appendChild(div);
     });
+}
+
+function showChart() {
+    let maxRain = 0;
+    seasonsData.forEach(s => {
+        const rain = statsData[s.season_name].total_rainfall;
+        if (rain > maxRain) {
+            maxRain = rain;
+        }
+    });
+
+    const chartContainer = document.getElementById('rain-chart');
+    seasonsData.forEach(s => {
+        const rain = statsData[s.season_name].total_rainfall;
+        const widthPercent = (rain / maxRain) * 90;
+
+        const barRow = document.createElement('div');
+        barRow.innerHTML = `<span>${s.season_name}</span>
+                             <div style="display:inline-block; width:${widthPercent}%; background:steelblue; height:18px;"></div>
+                             <span>${rain}mm</span>`;
+        chartContainer.appendChild(barRow);
+    });
+}
 </script>
 </body>
 </html>

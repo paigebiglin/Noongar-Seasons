@@ -1,0 +1,40 @@
+id,season_name,category,name,description,source
+1,Birak,animal,Fledglings leave nests,Young birds start to venture out of their nests,BOM Nyoongar Calendar
+2,Birak,animal,Reptile shedding,Snakes and bobtails start to shed their skin,BOM Nyoongar Calendar
+3,Birak,animal,Baby frogs mature,Baby frogs start to reach adulthood,BOM Nyoongar Calendar
+4,Birak,diet,Mullet,A key food source during Birak,BOM Nyoongar Calendar
+5,Birak,diet,Bream,A key food source during Birak,BOM Nyoongar Calendar
+6,Birak,diet,Marron,A key food source during Birak,BOM Nyoongar Calendar
+7,Birak,diet,Crabs,A key food source during Birak,BOM Nyoongar Calendar
+8,Birak,practice,"Mosaic burning","Small controlled low-intensity fires create a patchwork of burnt and unburnt land, clearing fuel loads that feed bushfires, supporting fire-dependent plant regeneration, and easing movement across the landscape",DEECA Vic (ffm.vic.gov.au)
+9,Bunuru,diet,"Herring (Ngari)",Plentiful during Bunuru,WA Fisheries
+10,Bunuru,diet,Salmon,Plentiful during Bunuru,WA Fisheries
+11,Bunuru,diet,Abalone,A key seafood source during Bunuru,WA Fisheries
+12,Bunuru,wildlife,"White flowers","Jarrah, marri and ghost gums flower white",BOM Nyoongar Calendar
+13,Bunuru,practice,Coastal movement,People moved to coastal estuaries and near the sea where it was cooler,BOM Nyoongar Calendar
+14,Djeran,practice,"Mia mia repair","Shelters are repaired and made waterproof for the cooler, damper nights",Noongar Kaartdijin
+15,Djeran,wildlife,"Red flowers","Banksias and red flowering gums bloom",BOM Nyoongar Calendar
+16,Djeran,wildlife,Green shoots,Green shoots may start to appear,BOM Nyoongar Calendar
+17,Djeran,diet,Mullet spearing,Good time to hunt around rivers and spear mullet,WA Fisheries
+18,Djeran,diet,Tailor spearing,Good time to hunt around rivers and spear tailor,WA Fisheries
+19,Djeran,practice,"Drying and storing food","Meat is dried and grain stored in preparation for the colder months",Noongar Kaartdijin
+20,Makuru,diet,Kangaroo,Food source shifts from waterways to land animals like kangaroo,Noongar Kaartdijin
+21,Makuru,practice,"Booka cloaks","Skin cloaks (bookas) made from kangaroo skin are used to keep warm",Noongar Kaartdijin
+22,Makuru,wildlife,"Black swans pair up",Animals pair up in preparation for breeding,BOM Nyoongar Calendar
+23,Makuru,wildlife,"Blue and purple flowers",Blue and purple flowers start to bloom,BOM Nyoongar Calendar
+24,Makuru,practice,"Family gathering","Families gather for warmth, share resources and prepare for the colder months",Noongar Kaartdijin
+25,Djilba,diet,Kangaroo,A key food source during Djilba,WA Fisheries
+26,Djilba,diet,Emu,A key food source during Djilba,WA Fisheries
+27,Djilba,diet,Possum,A key food source during Djilba,WA Fisheries
+28,Djilba,diet,"Black bream",Good time to catch freshwater black bream,WA Fisheries
+29,Djilba,wildlife,"Yellow wildflowers",Wildflower season starts with yellow flowers blooming first,BOM Nyoongar Calendar
+30,Djilba,wildlife,"Cream and blue wildflowers",Followed by cream and blue wildflowers,BOM Nyoongar Calendar
+31,Djilba,animal,Animals birthing,Animals start to give birth while birds are still nesting,BOM Nyoongar Calendar
+32,Kambarang,wildlife,"Full wildflower bloom","Banksias, kangaroo paw and orchids in full bloom",BOM Nyoongar Calendar
+33,Kambarang,wildlife,"Christmas tree flowering",The Australian Christmas tree flowers,BOM Nyoongar Calendar
+34,Kambarang,animal,Snakes active,Hot weather brings reptiles like snakes and bobtails out - the peak months for seeing snakes,BOM Nyoongar Calendar
+35,Kambarang,animal,Magpies swooping,Baby birds hatch and parents begin protecting nests by swooping,BOM Nyoongar Calendar
+36,Kambarang,diet,Frogs,Caught after moving back towards the coast,WA Fisheries
+37,Kambarang,diet,Tortoises,Caught after moving back towards the coast,WA Fisheries
+38,Kambarang,diet,Crayfish,Caught after moving back towards the coast,WA Fisheries
+39,Kambarang,practice,"Ceremonies","Families gather for ceremonies, sharing dance and knowledge",Noongar Kaartdijin
