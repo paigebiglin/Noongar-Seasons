@@ -38,9 +38,14 @@ python3 test_app.py
 This runs 10 automated tests covering core functionality, the season-stats algorithm, filtering, and invalid input/edge cases.
 
 ## Data sources
+## Data sources
 
-- **Seasons and environmental signs** (`data/seasons.csv`, `data/signs.csv`): sourced from the Bureau of Meteorology's Nyoongar Calendar (bom.gov.au), Noongar Kaartdijin, WA Department of Fisheries, and DEECA Victoria (fire management). All entries are attributed by source in the data itself.
-- **Weather data** (`data/weather.csv`): sourced from the Bureau of Meteorology's Daily Weather Observations for Perth (station 009225), August 2025 – July 2026, 364 daily records. Used under Creative Commons Attribution 4.0 International Licence. Manually transcribed from BOM's published PDF tables.
+- **Seasons and environmental signs** (`data/seasons.csv`, `data/signs.csv`): compiled from four sources, attributed per-entry within the data itself:
+  - Bureau of Meteorology, Nyoongar Calendar — https://www.bom.gov.au/resources/indigenous-weather-knowledge/indigenous-seasonal-calendars/nyoongar-calendar
+  - Noongar Kaartdijin — https://noongarkaartdijin.com.au/toodyay-waangkiny-yarn/f/noongar-six-bonar-seasons
+  - WA Department of Fisheries — https://marinewaters.fish.wa.gov.au/resource/fact-sheet-the-noongar-six-seasons/?pdf_export=1
+  - DEECA Victoria, fire management — https://www.ffm.vic.gov.au/fuel-management-report-2018-19/topics-of-interest/back-country-burning
+- **Weather data** (`data/weather.csv`): Bureau of Meteorology, Daily Weather Observations for Perth (station 009225) — https://www.bom.gov.au/climate/dwo/ — August 2025 to July 2026, 364 daily records. Used under Creative Commons Attribution 4.0 International Licence. Manually transcribed from BOM's published monthly PDF tables.
 
 ### Data cleaning
 
