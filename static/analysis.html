@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Six Seasons — Analysis</title>
+<style>
+    body { font-family: serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .bar-label { width: 100px; }
+    .bar { background: steelblue; height: 18px; margin-right: 8px; }
+    .trend-bar { background: #7aa6d1; height: 16px; margin-right: 8px; }
+</style>
+</head>
+<body>
+<a href="/">← Back to all seasons</a>
+<h1>Rainfall analysis</h1>
+<p>Seasons ranked from wettest to driest, based on 364 days of recorded weather (August 2025 – July 2026).</p>
+
+<div id="ranked-chart"></div>
+
+<h2>Monthly rainfall trend</h2>
+<p>Total rainfall recorded each calendar month across the full 12-month dataset.</p>
+<div id="trend-chart"></div>
+
+<script>
+    fetch('/api/season-stats-ranked')
+    .then(res => res.json())
+    .then(ranked => {
+        const maxRain = ranked[0].total_rainfall;
+        const container = document.getElementById('ranked-chart');
+
+        ranked.forEach((s, index) => {
+            const widthPercent = (s.total_rainfall / maxRain) * 90;
+            const row = document.createElement('div');
+            row.className = 'bar-row';
+            row.innerHTML = `<span class="bar-label">${index + 1}. ${s.season_name}</span>
+                            <div class="bar" style="width:${widthPercent}%"></div>
+                            <span>${s.total_rainfall}mm</span>`;
+            container.appendChild(row);
+        });
+    });
+
+    fetch('/api/monthly-trend')
+    .then(res => res.json())
+    .then(months => {
+        let maxRain = 0;
+        months.forEach(m => {
+            if (m.rainfall > maxRain) {
+                maxRain = m.rainfall;
+            }
+        });
+
+        const container = document.getElementById('trend-chart');
+        months.forEach(m => {
+            const widthPercent = (m.rainfall / maxRain) * 90;
+            const row = document.createElement('div');
+            row.className = 'bar-row';
+            row.innerHTML = `<span class="bar-label">${m.month}</span>
+                            <div class="trend-bar" style="width:${widthPercent}%"></div>
+                            <span>${m.rainfall}mm</span>`;
+            container.appendChild(row);
+        });
+    });
+</script>
+</body>
+</html>

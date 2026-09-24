@@ -100,5 +100,52 @@ def search_page():
     html = html.replace('SEARCH_QUERY', '"' + query + '"' if query else 'null')
     return html
 
+@app.route('/api/season-stats-ranked')
+def get_season_stats_ranked():
+    stats = get_season_stats().get_json()
+
+    ranked = []
+    for name, data in stats.items():
+        entry = {'season_name': name}
+        entry['avg_max_temp'] = data['avg_max_temp']
+        entry['avg_min_temp'] = data['avg_min_temp']
+        entry['total_rainfall'] = data['total_rainfall']
+        entry['days_recorded'] = data['days_recorded']
+        ranked.append(entry)
+
+    for i in range(len(ranked)):
+        for j in range(len(ranked) - 1 - i):
+            if ranked[j]['total_rainfall'] < ranked[j + 1]['total_rainfall']:
+                ranked[j], ranked[j + 1] = ranked[j + 1], ranked[j]
+
+    return jsonify(ranked)
+
+@app.route('/api/monthly-trend')
+def get_monthly_trend():
+    weather = load_weather()
+    monthly = {}
+
+    for day in weather:
+        month = day['date'][:7]
+        if month not in monthly:
+            monthly[month] = 0
+        monthly[month] += float(day['rainfall_mm'])
+
+    months = list(monthly.keys())
+    for i in range(len(months)):
+        for j in range(len(months) - 1 - i):
+            if months[j] > months[j + 1]:
+                months[j], months[j + 1] = months[j + 1], months[j]
+
+    trend = []
+    for m in months:
+        trend.append({'month': m, 'rainfall': round(monthly[m], 1)})
+
+    return jsonify(trend)
+
+@app.route('/analysis')
+def analysis_page():
+    return send_from_directory('static', 'analysis.html')
+
 if __name__ == '__main__':
         app.run(debug=True, port=5001)
