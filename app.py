@@ -80,10 +80,25 @@ def load_signs():
 @app.route('/api/signs')
 def get_signs():
     season = request.args.get('season')
+    query = request.args.get('q')
     signs = load_signs()
+
     if season:
         signs = [s for s in signs if s['season_name'] == season]
+
+    if query:
+        query = query.lower()
+        signs = [s for s in signs if query in s['name'].lower() or query in s['description'].lower()]
+
     return jsonify(signs)
+
+@app.route('/search')
+def search_page():
+    query = request.args.get('q', '')
+    with open('static/search.html') as f:
+        html = f.read()
+    html = html.replace('SEARCH_QUERY', '"' + query + '"' if query else 'null')
+    return html
 
 if __name__ == '__main__':
         app.run(debug=True, port=5001)

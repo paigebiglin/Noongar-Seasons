@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>Search Signs</title></head>
+<body>
+<a href="/">← Back to all seasons</a>
+<h1>Search Environmental Signs</h1>
+
+<form action="/search" method="get">
+    <input type="text" name="q" placeholder="Search e.g. kangaroo, wildflower, fishing">
+    <button type="submit">Search</button>
+</form>
+
+<div id="results"></div>
+
+<script>
+    const params = SEARCH_QUERY;
+
+    if (params) {
+        fetch('/api/signs?q=' + params)
+        .then(res => res.json())
+        .then(signs => {
+            const container = document.getElementById('results');
+
+            if (signs.length === 0) {
+                container.innerHTML = '<p>No signs found.</p>';
+            }
+
+            signs.forEach(sign => {
+                const div = document.createElement('div');
+                div.innerHTML = `<h3>${sign.name} (${sign.season_name})</h3>
+                                <p>${sign.description}</p>
+                                <p><em>Category: ${sign.category} | Source: ${sign.source}</em></p>`;
+                container.appendChild(div);
+            });
+        });
+    }
+</script>
+</body>
+</html>
