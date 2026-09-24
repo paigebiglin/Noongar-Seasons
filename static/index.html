@@ -1,66 +1,63 @@
 <!DOCTYPE html>
 <html>
-<head><title>Noongar Seasons</title></head>
+<head>
+<title>The Six Seasons</title>
+<style>
+    body { font-family: serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+    .subtitle { color: #666; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
+    .intro { font-size: 1.1em; color: #333; margin-bottom: 24px; }
+    .stat-box { background: #eef4ee; border-left: 4px solid steelblue; padding: 10px 14px; margin: 10px 0; }
+    h2 a { text-transform: capitalize; }
+</style>
+</head>
 <body>
-<h1>Noongar Six Seasons</h1>
-<p><a href="/search">Search all environmental signs →</a></p>
+<h1>The Six Seasons</h1>
+<p class="subtitle">Exploring the Noongar seasonal calendar</p>
+
+<p class="intro">
+    The Noongar six-season calendar describes the natural cycle of Country in the South West of Western Australia
+    through weather patterns and environmental signs. This app compares what the traditional calendar says about
+    each season with real weather data recorded for Perth between August 2025 and July 2026 — showing where the
+    two agree, and where the picture is more complex.
+</p>
+
+<p><a href="/search">Search all environmental signs →</a> &nbsp;|&nbsp; <a href="/analysis">View rainfall analysis →</a></p>
+
 <div id="seasons"></div>
-<h2>Total rainfall by season</h2>
-<div id="rain-chart"></div>
 
 <script>
     let seasonsData = [];
-let statsData = {};
+    let statsData = {};
 
-fetch('/api/seasons')
-.then(res => res.json())
-.then(seasons => {
-    seasonsData = seasons;
-    return fetch('/api/season-stats');
-})
-.then(res => res.json())
-.then(stats => {
-    statsData = stats;
-    showSeasons();
-    showChart();
-});
-
-function showSeasons() {
-    const container = document.getElementById('seasons');
-    seasonsData.forEach(s => {
-        const stats = statsData[s.season_name];
-        const div = document.createElement('div');
-        div.innerHTML = `<h2><a href="/season/${s.season_name}">${s.season_name} (${s.noongar_name})</a></h2>
-                        <p>${s.gregorian_months}</p>
-                        <p>${s.weather_desc}</p>
-                        <p><strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min, ${stats.total_rainfall}mm total rain</p>`;
-        container.appendChild(div);
-    });
-}
-
-function showChart() {
-    let maxRain = 0;
-    seasonsData.forEach(s => {
-        const rain = statsData[s.season_name].total_rainfall;
-        if (rain > maxRain) {
-            maxRain = rain;
-        }
+    fetch('/api/seasons')
+    .then(res => res.json())
+    .then(seasons => {
+        seasonsData = seasons;
+        return fetch('/api/season-stats');
+    })
+    .then(res => res.json())
+    .then(stats => {
+        statsData = stats;
+        showSeasons();
     });
 
-    const chartContainer = document.getElementById('rain-chart');
-    seasonsData.forEach(s => {
-        const rain = statsData[s.season_name].total_rainfall;
-        const widthPercent = (rain / maxRain) * 90;
-
-        const barRow = document.createElement('div');
-        barRow.innerHTML = `<span>${s.season_name}</span>
-                             <div style="display:inline-block; width:${widthPercent}%; background:steelblue; height:18px;"></div>
-                             <span>${rain}mm</span>`;
-        chartContainer.appendChild(barRow);
-    });
-}
+    function showSeasons() {
+        const container = document.getElementById('seasons');
+        seasonsData.forEach(s => {
+            const stats = statsData[s.season_name];
+            const div = document.createElement('div');
+            div.innerHTML = `<h2><a href="/season/${s.season_name}">${s.season_name} (${s.noongar_name})</a></h2>
+                            <p>${s.gregorian_months}</p>
+                            <p>${s.weather_desc}</p>
+                            <div class="stat-box">
+                                <strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min &nbsp;|&nbsp;
+                                <strong>Total rainfall:</strong> ${stats.total_rainfall}mm &nbsp;|&nbsp;
+                                <strong>Days recorded:</strong> ${stats.days_recorded}
+                            </div>`;
+            container.appendChild(div);
+        });
+    }
 </script>
 </body>
 </html>
-
 
