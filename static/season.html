@@ -12,10 +12,10 @@
     /* Big season title in the middle of the page */
     h1 { font-size: 3em; margin-bottom: 10px; }
 
-    /* NEW: the small description under the title (e.g. "First summer - hot and dry") */
+    /* The small description under the title (e.g. "First summer - hot and dry") */
     #season-desc { font-size: 1.1em; color: #333; margin: 0 0 16px 0; }
 
-    /* NEW: the green stats box, same look as the home page; inline-block lets it sit centred */
+    /* The green stats box; inline-block lets it sit centred */
     .stat-box { background: #eef4ee; border-left: 4px solid steelblue; padding: 10px 14px; margin: 10px 0; display: inline-block; text-align: left; }
 
     /* Each category (Animals, Diet, Practices) is its own section with a big gap above it and a thin line to separate it */
@@ -37,7 +37,7 @@
 <a class="back-link" href="/">← Back to all seasons</a>
 <h1 id="season-title"></h1>
 
-<!-- NEW: filled in by the script below with the description and the weather stats -->
+<!-- Filled in by the script below with the description and the weather stats -->
 <p id="season-desc"></p>
 <div id="season-stats"></div>
 
@@ -48,7 +48,7 @@
 
     document.getElementById('season-title').textContent = seasonName;
 
-    // NEW: load the season's description and weather stats, then show them under the title
+    // Load the season's description and weather stats, then show them under the title
     fetch('/api/seasons')
     .then(res => res.json())
     .then(seasons => {
@@ -75,6 +75,7 @@
     });
 
     // Fixes the grammar of the category names coming from your database
+    // (they are lowercase and singular, e.g. "animal"). Add more here if you have other categories.
     const CATEGORY_NAMES = {
         animal: 'Animals',
         diet: 'Diet',
