@@ -1,19 +1,66 @@
 <!DOCTYPE html>
+<!-- Tells the browser this is a modern HTML5 page -->
 <html>
 <head>
-<title>The Six Seasons</title>
+<title>Noongar Bonar</title> <!-- Text shown on the browser tab -->
 <style>
+    /* Page-wide font, width limit, centring of the content column, and padding around the edges */
     body { font-family: serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-    .subtitle { color: #666; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
+
+    /* Centres the main title horizontally */
+    h1 { text-align: center; }
+
+    /* Grey italic subtitle, centred. Negative top margin pulls it closer to the title */
+    .subtitle { color: #666; font-style: italic; margin-top: -10px; margin-bottom: 20px; text-align: center; }
+
+    /* Intro paragraph: slightly bigger, dark grey text, space underneath */
     .intro { font-size: 1.1em; color: #333; margin-bottom: 24px; }
-    .stat-box { background: #eef4ee; border-left: 4px solid steelblue; padding: 10px 14px; margin: 10px 0; }
-    h2 a { text-transform: capitalize; }
+
+    /* Container for the wheel: limits its width and centres it on the page */
+    .wheel-wrap { max-width: 560px; margin: 0 auto; }
+
+    /* The SVG fills its container and scales down on small screens; display:block removes stray gaps */
+    #wheel { width: 100%; height: auto; display: block; }
+
+    /* Season segments are clickable links: pointer cursor and no default focus outline */
+    #wheel a { cursor: pointer; outline: none; }
+
+    /* Smooth animation for the inner wedge and outer band; transform-origin is the wheel's centre (300,300) so scaling grows outward from the middle */
+    #wheel .inner, #wheel .band { transition: opacity 0.15s, transform 0.15s; transform-origin: 300px 300px; }
+
+    /* On hover or keyboard focus, make the segment slightly see-through so you can tell it's selected */
+    #wheel a:hover .inner, #wheel a:focus .inner,
+    #wheel a:hover .band,  #wheel a:focus .band { opacity: 0.85; }
+
+    /* On hover or focus, also enlarge the outer band by 3% so it "pops" */
+    #wheel a:hover .band,  #wheel a:focus .band { transform: scale(1.03); }
+
+    /* Season names on the coloured band: white, bold, spaced out, centred on their position.
+       pointer-events:none lets clicks pass through the text to the link underneath */
+    .season-label { fill: #fff; font-weight: bold; letter-spacing: 1.5px; font-size: 19px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+
+    /* Month names (DEC, JAN...) in the outer ring: small, bold, centred, not clickable on their own */
+    .month-label { font-size: 13px; letter-spacing: 1px; text-anchor: middle; dominant-baseline: middle; font-weight: bold; pointer-events: none; }
+
+    /* "SIX / SEASONS" text in the middle of the wheel: dark green, bold, centred */
+    .center-text { font-weight: bold; fill: #17453f; text-anchor: middle; font-size: 26px; }
+
+    /* Small "NOONGAR BOODJA" text above the centre words: grey, tiny, widely spaced */
+    .center-sub { fill: #777; text-anchor: middle; font-size: 11px; letter-spacing: 2px; }
+
+    /* Area under the wheel where the season name and months appear.
+       min-height (reduced to 80px) stops the page jumping when the text changes */
+    #season-info { min-height: 80px; text-align: center; margin-top: 10px; }
+
+    /* Space under the season heading in the info area */
+    #season-info h2 { margin-bottom: 4px; }
 </style>
 </head>
 <body>
-<h1>The Six Seasons</h1>
-<p class="subtitle">Exploring the Noongar seasonal calendar</p>
+<h1>Noongar Bonar</h1> <!-- Main page title, centred by the h1 CSS rule -->
+<p class="subtitle">Exploring the Noongar seasonal calendar</p> <!-- Subtitle, centred by the .subtitle rule -->
 
+<!-- Intro paragraph explaining what the app does -->
 <p class="intro">
     The Noongar six-season calendar describes the natural cycle of Country in the South West of Western Australia
     through weather patterns and environmental signs. This app compares what the traditional calendar says about
@@ -21,43 +68,127 @@
     two agree, and where the picture is more complex.
 </p>
 
+<!-- Links to the Search page and the rainfall analysis page; &nbsp; adds a non-breaking space around the | divider -->
 <p><a href="/search">Search →</a> &nbsp;|&nbsp; <a href="/analysis">View rainfall analysis →</a></p>
 
-<div id="seasons"></div>
+<!-- Wrapper that centres and sizes the wheel -->
+<div class="wheel-wrap">
+    <!-- Empty SVG canvas, 600x600 units; JavaScript fills it with the wheel. role/aria-label describe it for screen readers -->
+    <svg id="wheel" viewBox="0 0 600 600" role="img" aria-label="Noongar six seasons wheel"></svg>
+</div>
+
+<!-- Placeholder text shown until the user hovers or tabs onto a season; replaced by the season name and months -->
+<div id="season-info"><p><em>Hover over (or tab to) a season to see its months. Click to explore it.</em></p></div>
 
 <script>
-    let seasonsData = [];
-    let statsData = {};
+    let seasonsData = [];  // Will hold the list of seasons from your API
+    let statsData = {};    // Will hold the weather stats for each season (still loaded, in case you want them later)
 
-    fetch('/api/seasons')
-    .then(res => res.json())
+    fetch('/api/seasons')                  // Ask the server for the list of seasons
+    .then(res => res.json())               // Convert the response to JavaScript data
     .then(seasons => {
-        seasonsData = seasons;
-        return fetch('/api/season-stats');
+        seasonsData = seasons;             // Save the seasons for later use
+        return fetch('/api/season-stats'); // Then ask for the weather stats
     })
-    .then(res => res.json())
+    .then(res => res.json())               // Convert the stats response to JavaScript data
     .then(stats => {
-        statsData = stats;
-        showSeasons();
+        statsData = stats;                 // Save the stats for later use
+        drawWheel();                       // Both sets of data are ready, so draw the wheel
     });
 
-    function showSeasons() {
-        const container = document.getElementById('seasons');
-        seasonsData.forEach(s => {
-            const stats = statsData[s.season_name];
-            const div = document.createElement('div');
-            div.innerHTML = `<h2><a href="/season/${s.season_name}">${s.season_name} (${s.noongar_name})</a></h2>
-                            <p>${s.gregorian_months}</p>
-                            <p>${s.weather_desc}</p>
-                            <div class="stat-box">
-                                <strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min &nbsp;|&nbsp;
-                                <strong>Total rainfall:</strong> ${stats.total_rainfall}mm &nbsp;|&nbsp;
-                                <strong>Days recorded:</strong> ${stats.days_recorded}
-                            </div>`;
-            container.appendChild(div);
+    // LAYOUT sets where each season goes on the wheel and what colours it uses.
+    // Angles are degrees clockwise from the top. Each season covers 60 degrees.
+    // start = where the segment begins; band = outer ring colour; inner = inner wedge colour;
+    // months = labels for the outer ring; mc = colour of those month labels.
+    const LAYOUT = {
+        birak:      { start: -30, band: '#e5502f', inner: '#ee3b4b', months: ['DEC', 'JAN'], mc: '#e5502f' }, // Top, centred on 12 o'clock
+        bunuru:     { start:  30, band: '#ee9234', inner: '#fbd62f', months: ['FEB', 'MAR'], mc: '#ee9234' }, // Upper right
+        djeran:     { start:  90, band: '#a9bb6e', inner: '#f58a1f', months: ['APR', 'MAY'], mc: '#a9bb6e' }, // Lower right
+        makuru:     { start: 150, band: '#17453f', inner: '#4bb6ee', months: ['JUN', 'JUL'], mc: '#17453f' }, // Bottom
+        djilba:     { start: 210, band: '#7c9d5e', inner: '#43c9be', months: ['AUG', 'SEP'], mc: '#7c9d5e' }, // Lower left
+        kambarang:  { start: 270, band: '#2f8071', inner: '#7ccf3f', months: ['OCT', 'NOV'], mc: '#2f8071' }  // Upper left
+    };
+
+    const CX = 300, CY = 300; // Centre point of the wheel (middle of the 600x600 canvas)
+
+    // Converts a distance from the centre (r) and an angle (deg) into x,y coordinates on the canvas
+    function polar(r, deg) {
+        const rad = deg * Math.PI / 180;                          // Convert degrees to radians, which Math.sin/cos need
+        return [CX + r * Math.sin(rad), CY - r * Math.cos(rad)];  // 0 degrees = top, angles go clockwise
+    }
+
+    // Builds the outline of one ring segment (a curved "slice" between radius r1 and r2, from angle a1 to a2)
+    function wedge(r1, r2, a1, a2) {
+        const [x1, y1] = polar(r2, a1), [x2, y2] = polar(r2, a2); // Two corners on the outer edge
+        const [x3, y3] = polar(r1, a2), [x4, y4] = polar(r1, a1); // Two corners on the inner edge
+        // M = move to start; A = draw an arc; L = straight line; Z = close the shape
+        return `M${x1},${y1} A${r2},${r2} 0 0 1 ${x2},${y2} L${x3},${y3} A${r1},${r1} 0 0 0 ${x4},${y4} Z`;
+    }
+
+    // Positions and rotates a piece of text so it follows the wheel.
+    // On the bottom half (90-270 degrees) it's flipped 180 degrees so it isn't upside down.
+    function labelTransform(r, deg) {
+        const [x, y] = polar(r, deg);                           // Where the text sits
+        const rot = (deg > 90 && deg < 270) ? deg + 180 : deg;  // Flip bottom-half text
+        return `translate(${x},${y}) rotate(${rot})`;           // Move there, then rotate
+    }
+
+    function drawWheel() {
+        const svg = document.getElementById('wheel'); // Grab the empty SVG canvas
+        let html = '';                                // We'll build up all the SVG shapes as one string
+
+        // White background disc with a light grey outline, radius 295 (the outermost edge)
+        html += `<circle cx="${CX}" cy="${CY}" r="295" fill="#fff" stroke="#ddd"/>`;
+
+        seasonsData.forEach(s => {                    // Loop through each season from your API
+            const key = s.season_name.toLowerCase();  // e.g. "Birak" becomes "birak" to match LAYOUT
+            const L = LAYOUT[key];                    // Look up this season's position and colours
+            if (!L) return;                           // If the name isn't in LAYOUT, skip it
+            const a1 = L.start, a2 = L.start + 60, mid = L.start + 30; // Start angle, end angle, middle angle
+
+            // Each season is one clickable link containing three things:
+            html += `<a href="/season/${s.season_name}" data-season="${s.season_name}" tabindex="0">
+                <!-- Inner wedge: the lighter-coloured section from radius 95 to 195 -->
+                <path class="inner" d="${wedge(95, 195, a1, a2)}" fill="${L.inner}" stroke="#fff" stroke-width="2"/>
+                <!-- Outer band: the darker-coloured ring from radius 195 to 255 -->
+                <path class="band"  d="${wedge(195, 255, a1, a2)}" fill="${L.band}" stroke="#fff" stroke-width="2"/>
+                <!-- Season name in capitals, placed in the middle of the band at radius 225 -->
+                <text class="season-label" transform="${labelTransform(225, mid)}">${s.season_name.toUpperCase()}</text>
+            </a>`;
+
+            // Month labels sit in the outermost ring (radius 278), one per 30-degree half of the segment
+            L.months.forEach((m, i) => {
+                const deg = a1 + 15 + i * 30; // 15 degrees in for the first month, 45 degrees in for the second
+                html += `<text class="month-label" fill="${L.mc}" transform="${labelTransform(278, deg)}">${m}</text>`;
+            });
         });
+
+        // Centre disc (radius 95): white with a dotted dark-green outline, plus the text inside it
+        html += `<circle cx="${CX}" cy="${CY}" r="95" fill="#fff" stroke="#17453f" stroke-width="3" stroke-dasharray="2 5"/>
+                 <text class="center-text" x="${CX}" y="${CY - 2}">SIX</text>
+                 <text class="center-text" x="${CX}" y="${CY + 28}">SEASONS</text>
+                 <text class="center-sub" x="${CX}" y="${CY - 30}">NOONGAR BOODJA</text>`;
+
+        svg.innerHTML = html; // Put all the shapes into the SVG so they appear on screen
+
+        // Make each season segment show its details when hovered or tabbed to
+        svg.querySelectorAll('a').forEach(a => {
+            const show = () => showInfo(a.dataset.season); // Function that shows this season's info
+            a.addEventListener('mouseenter', show);        // When the mouse moves over it
+            a.addEventListener('focus', show);             // When reached by keyboard (Tab key)
+        });
+    }
+
+    // Fills the info area under the wheel with just the season name and its months.
+    // The description and weather stats now live on the season page instead.
+    function showInfo(name) {
+        const s = seasonsData.find(x => x.season_name === name); // Find the season's data
+        document.getElementById('season-info').innerHTML = `
+            <h2>${s.season_name} (${s.noongar_name})</h2>
+            <p>${s.gregorian_months}</p>`;
     }
 </script>
 </body>
 </html>
-
+</body>
+</html>

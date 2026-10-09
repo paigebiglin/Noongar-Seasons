@@ -1,27 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>The Six Seasons — Analysis</title>
+<title>Rainfall Analysis</title>
 <style>
-    body { font-family: serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-    .bar-row { display: flex; align-items: center; margin-bottom: 6px; }
-    .bar-label { width: 100px; }
-    .bar { background: steelblue; height: 18px; margin-right: 8px; }
-    .trend-bar { background: #7aa6d1; height: 16px; margin-right: 8px; }
+    /* Same font as the other pages, slightly wider so the bars have room */
+    body { font-family: serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+
+    /* Back link centred like the other pages */
+    .back-link { display: block; text-align: center; margin-bottom: 20px; }
+
+    /* Centred, dark green headings to match the wheel */
+    h1 { text-align: center; font-size: 3em; color: #17453f; margin-bottom: 10px; }
+    h2 { text-align: center; font-size: 2em; color: #17453f; margin: 0 0 10px 0; }
+
+    /* Centred grey intro text under each heading */
+    .desc { text-align: center; color: #555; margin: 0 0 35px 0; }
+
+    /* Each chart is its own section with a big gap above it and a thin line to separate it */
+    .section { margin-top: 70px; padding-top: 40px; border-top: 2px solid #ddd; }
+    .section.first { margin-top: 30px; border-top: none; }
+
+    /* One row per bar, with more space between rows */
+    .bar-row { display: flex; align-items: center; margin-bottom: 18px; }
+
+    /* Label has a fixed width and never shrinks, so every bar lines up (fixes "September 2025" wrapping) */
+    .bar-label { width: 150px; flex-shrink: 0; font-size: 1.05em; }
+
+    /* The grey track the bar sits in; flex:1 makes it fill the space between label and value */
+    .track { flex: 1; background: #f3f3f3; border-radius: 6px; height: 28px; }
+
+    /* The coloured bar itself; its colour is set per row by the script */
+    .bar { height: 28px; border-radius: 6px; transition: width 0.4s; }
+
+    /* The mm value at the end of each row */
+    .value { width: 90px; flex-shrink: 0; margin-left: 12px; font-weight: bold; }
 </style>
 </head>
 <body>
-<a href="/">← Back to all seasons</a>
+<a class="back-link" href="/">← Back to all seasons</a>
 <h1>Rainfall analysis</h1>
-<p>Seasons ranked from wettest to driest, based on 364 days of recorded weather (August 2025 – July 2026).</p>
 
-<div id="ranked-chart"></div>
+<div class="section first">
+    <p class="desc">Seasons ranked from wettest to driest, based on 364 days of recorded weather (August 2025 – July 2026).</p>
+    <div id="ranked-chart"></div>
+</div>
 
-<h2>Monthly rainfall trend</h2>
-<p>Total rainfall recorded each calendar month across the full 12-month dataset.</p>
-<div id="trend-chart"></div>
+<div class="section">
+    <h2>Monthly rainfall trend</h2>
+    <p class="desc">Total rainfall recorded each calendar month across the full 12-month dataset.</p>
+    <div id="trend-chart"></div>
+</div>
 
 <script>
+    // Colour for each season, taken from the wheel on the home page
+    const SEASON_COLOURS = {
+        birak: '#e5502f',
+        bunuru: '#ee9234',
+        djeran: '#a9bb6e',
+        makuru: '#17453f',
+        djilba: '#7c9d5e',
+        kambarang: '#2f8071'
+    };
+
+    // Which season each calendar month belongs to, so monthly bars get the matching colour
+    const MONTH_SEASON = {
+        january: 'birak', december: 'birak',
+        february: 'bunuru', march: 'bunuru',
+        april: 'djeran', may: 'djeran',
+        june: 'makuru', july: 'makuru',
+        august: 'djilba', september: 'djilba',
+        october: 'kambarang', november: 'kambarang'
+    };
+
+    // Builds one bar row. Used by both charts.
+    function makeRow(label, value, percent, colour) {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `<span class="bar-label">${label}</span>
+                        <div class="track"><div class="bar" style="width:${percent}%; background:${colour}"></div></div>
+                        <span class="value">${value}mm</span>`;
+        return row;
+    }
+
+    // Seasons ranked wettest to driest
     fetch('/api/season-stats-ranked')
     .then(res => res.json())
     .then(ranked => {
@@ -29,16 +90,13 @@
         const container = document.getElementById('ranked-chart');
 
         ranked.forEach((s, index) => {
-            const widthPercent = (s.total_rainfall / maxRain) * 90;
-            const row = document.createElement('div');
-            row.className = 'bar-row';
-            row.innerHTML = `<span class="bar-label">${index + 1}. ${s.season_name}</span>
-                            <div class="bar" style="width:${widthPercent}%"></div>
-                            <span>${s.total_rainfall}mm</span>`;
-            container.appendChild(row);
+            const percent = (s.total_rainfall / maxRain) * 100;
+            const colour = SEASON_COLOURS[s.season_name.toLowerCase()] || 'steelblue';
+            container.appendChild(makeRow(`${index + 1}. ${s.season_name}`, s.total_rainfall, percent, colour));
         });
     });
 
+    // Rainfall for each month
     fetch('/api/monthly-trend')
     .then(res => res.json())
     .then(months => {
@@ -51,13 +109,11 @@
 
         const container = document.getElementById('trend-chart');
         months.forEach(m => {
-            const widthPercent = (m.rainfall / maxRain) * 90;
-            const row = document.createElement('div');
-            row.className = 'bar-row';
-            row.innerHTML = `<span class="bar-label">${m.month}</span>
-                            <div class="trend-bar" style="width:${widthPercent}%"></div>
-                            <span>${m.rainfall}mm</span>`;
-            container.appendChild(row);
+            const percent = (m.rainfall / maxRain) * 100;
+            // "August 2025" -> "august" -> its season -> its colour
+            const monthName = m.month.split(' ')[0].toLowerCase();
+            const colour = SEASON_COLOURS[MONTH_SEASON[monthName]] || 'steelblue';
+            container.appendChild(makeRow(m.month, m.rainfall, percent, colour));
         });
     });
 </script>

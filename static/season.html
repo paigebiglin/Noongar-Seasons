@@ -1,9 +1,45 @@
 <!DOCTYPE html>
 <html>
-<head><title>Season Detail</title></head>
+<head>
+<title>Season Detail</title> <!-- Text shown on the browser tab -->
+<style>
+    /* Same font and width as your home page, with everything centred */
+    body { font-family: serif; max-width: 800px; margin: 0 auto; padding: 20px; text-align: center; }
+
+    /* The "Back to all seasons" link is centred like the rest of the page */
+    .back-link { display: block; margin-bottom: 20px; }
+
+    /* Big season title in the middle of the page */
+    h1 { font-size: 3em; margin-bottom: 10px; }
+
+    /* NEW: the small description under the title (e.g. "First summer - hot and dry") */
+    #season-desc { font-size: 1.1em; color: #333; margin: 0 0 16px 0; }
+
+    /* NEW: the green stats box, same look as the home page; inline-block lets it sit centred */
+    .stat-box { background: #eef4ee; border-left: 4px solid steelblue; padding: 10px 14px; margin: 10px 0; display: inline-block; text-align: left; }
+
+    /* Each category (Animals, Diet, Practices) is its own section with a big gap above it and a thin line to separate it */
+    .category { margin-top: 90px; padding-top: 40px; border-top: 2px solid #ddd; }
+
+    /* Category headings: dark green with a little letter spacing */
+    .category h2 { font-size: 2em; color: #17453f; margin-bottom: 30px; letter-spacing: 1px; }
+
+    /* Each sign (e.g. "Mullet") gets space below it so they don't run together */
+    .sign { margin-bottom: 35px; }
+    .sign h3 { margin-bottom: 6px; }
+    .sign p { margin: 6px 0; }
+
+    /* Small grey italic source line */
+    .source { color: #666; font-size: 0.9em; }
+</style>
+</head>
 <body>
-<a href="/">← Back to all seasons</a>
+<a class="back-link" href="/">← Back to all seasons</a>
 <h1 id="season-title"></h1>
+
+<!-- NEW: filled in by the script below with the description and the weather stats -->
+<p id="season-desc"></p>
+<div id="season-stats"></div>
 
 <div id="signs"></div>
 
@@ -12,11 +48,54 @@
 
     document.getElementById('season-title').textContent = seasonName;
 
+    // NEW: load the season's description and weather stats, then show them under the title
+    fetch('/api/seasons')
+    .then(res => res.json())
+    .then(seasons => {
+        // Find this season in the list (ignoring upper/lower case)
+        const s = seasons.find(x => x.season_name.toLowerCase() === seasonName.toLowerCase());
+        if (s) {
+            document.getElementById('season-desc').textContent = s.weather_desc;
+        }
+        return fetch('/api/season-stats');
+    })
+    .then(res => res.json())
+    .then(statsData => {
+        // The stats are stored by season name, so find the matching key
+        const key = Object.keys(statsData).find(k => k.toLowerCase() === seasonName.toLowerCase());
+        if (key) {
+            const stats = statsData[key];
+            document.getElementById('season-stats').innerHTML = `
+                <div class="stat-box">
+                    <strong>Recorded average:</strong> ${stats.avg_max_temp}°C max / ${stats.avg_min_temp}°C min &nbsp;|&nbsp;
+                    <strong>Total rainfall:</strong> ${stats.total_rainfall}mm &nbsp;|&nbsp;
+                    <strong>Days recorded:</strong> ${stats.days_recorded}
+                </div>`;
+        }
+    });
+
+    // Fixes the grammar of the category names coming from your database
+    const CATEGORY_NAMES = {
+        animal: 'Animals',
+        diet: 'Diet',
+        practice: 'Practices'
+    };
+
+    // Uses the nice name if there is one, otherwise just capitalises the first letter
+    function prettyCategory(name) {
+        const key = name.toLowerCase();
+        if (CATEGORY_NAMES[key]) {
+            return CATEGORY_NAMES[key];
+        }
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+
     fetch('/api/signs?season=' + seasonName)
     .then(res => res.json())
     .then(signs => {
         const container = document.getElementById('signs');
 
+        // Group the signs by category
         const categories = {};
         signs.forEach(sign => {
             if (!categories[sign.category]) {
@@ -25,18 +104,25 @@
             categories[sign.category].push(sign);
         });
 
+        // Build one section per category
         Object.keys(categories).forEach(category => {
+            const section = document.createElement('div');
+            section.className = 'category';
+
             const heading = document.createElement('h2');
-            heading.textContent = category;
-            container.appendChild(heading);
+            heading.textContent = prettyCategory(category);
+            section.appendChild(heading);
 
             categories[category].forEach(sign => {
                 const div = document.createElement('div');
+                div.className = 'sign';
                 div.innerHTML = `<h3>${sign.name}</h3>
                                 <p>${sign.description}</p>
-                                <p><em>Source: ${sign.source}</em></p>`;
-                container.appendChild(div);
+                                <p class="source"><em>Source: ${sign.source}</em></p>`;
+                section.appendChild(div);
             });
+
+            container.appendChild(section);
         });
     });
 </script>
